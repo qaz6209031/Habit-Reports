@@ -40,7 +40,7 @@ const Heatmap: React.FC<HeatmapProps> = ({ color, completionData, startDate, end
     if (!isCurrentYear) return 'transparent'; // Hide days from prev/next year
 
     const intensity = completionData[dateStr] || 0;
-    if (intensity === 0) return '#1A1A1A'; // Default dark grid color
+    if (intensity === 0) return '#2A2A2C'; // Slightly lighter to be visible on dark card
 
     // Defensive check for hex color
     const isHex = color.startsWith('#');
