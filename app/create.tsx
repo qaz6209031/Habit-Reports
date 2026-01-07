@@ -1,13 +1,17 @@
 import { useHabits } from '@/context/HabitContext';
 import { MaterialIcons } from '@expo/vector-icons';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { addMonths, format, startOfToday } from 'date-fns';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
     KeyboardAvoidingView,
+    Modal,
     Platform,
     ScrollView,
     StatusBar,
     StyleSheet,
+    Switch,
     Text,
     TextInput,
     TouchableOpacity,
@@ -39,10 +43,24 @@ const ICONS = [
 
 export default function CreateHabitScreen() {
     const [name, setName] = useState('');
+    const [startDate, setStartDate] = useState(startOfToday());
+    const [endDate, setEndDate] = useState<Date | null>(null);
+    const [hasEndDate, setHasEndDate] = useState(false);
+    const [showStartDatePicker, setShowStartDatePicker] = useState(false);
+    const [showEndDatePicker, setShowEndDatePicker] = useState(false);
     const [selectedColor, setSelectedColor] = useState(COLORS[0]);
     const [selectedIcon, setSelectedIcon] = useState('water-drop');
     const { addHabit } = useHabits();
     const router = useRouter();
+
+    const handleToggleEndDate = (value: boolean) => {
+        setHasEndDate(value);
+        if (value && !endDate) {
+            setEndDate(addMonths(startDate, 1));
+        } else if (!value) {
+            setEndDate(null);
+        }
+    };
 
     const handleCreate = async () => {
         if (!name.trim()) return;
@@ -50,8 +68,28 @@ export default function CreateHabitScreen() {
             name,
             color: selectedColor,
             icon: selectedIcon,
+            startDate: format(startDate, 'yyyy-MM-dd'),
+            endDate: endDate ? format(endDate, 'yyyy-MM-dd') : null,
         });
         router.back();
+    };
+
+    const onStartDateChange = (event: any, selectedDate?: Date) => {
+        setShowStartDatePicker(Platform.OS === 'ios');
+        if (selectedDate) {
+            setStartDate(selectedDate);
+            // Ensure end date is not before start date
+            if (endDate && selectedDate > endDate) {
+                setEndDate(null);
+            }
+        }
+    };
+
+    const onEndDateChange = (event: any, selectedDate?: Date) => {
+        setShowEndDatePicker(Platform.OS === 'ios');
+        if (selectedDate) {
+            setEndDate(selectedDate);
+        }
     };
 
     return (
@@ -82,6 +120,100 @@ export default function CreateHabitScreen() {
                             />
                             <MaterialIcons name="edit" size={20} color={selectedColor} />
                         </View>
+                    </View>
+
+                    <View style={styles.section}>
+                        <View style={styles.sectionHeaderInner}>
+                            <Text style={styles.label}>Habit Duration</Text>
+                            <View style={styles.switchContainer}>
+                                <Text style={styles.switchLabel}>Fixed Period</Text>
+                                <Switch
+                                    value={hasEndDate}
+                                    onValueChange={handleToggleEndDate}
+                                    trackColor={{ false: '#2C2C2E', true: selectedColor + '88' }}
+                                    thumbColor={hasEndDate ? selectedColor : '#9CA3AF'}
+                                    ios_backgroundColor="#2C2C2E"
+                                />
+                            </View>
+                        </View>
+
+                        <View style={styles.durationCards}>
+                            <TouchableOpacity
+                                style={styles.dateCard}
+                                onPress={() => setShowStartDatePicker(true)}
+                            >
+                                <View style={[styles.dateCardIcon, { backgroundColor: selectedColor + '22' }]}>
+                                    <MaterialIcons name="calendar-today" size={22} color={selectedColor} />
+                                </View>
+                                <View style={styles.dateCardInfo}>
+                                    <Text style={styles.dateCardLabel}>Starts On</Text>
+                                    <Text style={styles.dateCardValue}>{format(startDate, 'EEEE, MMM dd')}</Text>
+                                </View>
+                                <MaterialIcons name="chevron-right" size={20} color="#4B5563" />
+                            </TouchableOpacity>
+
+                            {hasEndDate && (
+                                <TouchableOpacity
+                                    style={[styles.dateCard, { marginTop: 12 }]}
+                                    onPress={() => setShowEndDatePicker(true)}
+                                >
+                                    <View style={[styles.dateCardIcon, { backgroundColor: '#EF444422' }]}>
+                                        <MaterialIcons name="event-busy" size={22} color="#EF4444" />
+                                    </View>
+                                    <View style={styles.dateCardInfo}>
+                                        <Text style={styles.dateCardLabel}>Ends On</Text>
+                                        <Text style={styles.dateCardValue}>
+                                            {endDate ? format(endDate, 'EEEE, MMM dd') : 'Select Date'}
+                                        </Text>
+                                    </View>
+                                    <MaterialIcons name="chevron-right" size={20} color="#4B5563" />
+                                </TouchableOpacity>
+                            )}
+                        </View>
+
+                        <Modal
+                            visible={showStartDatePicker || showEndDatePicker}
+                            transparent={true}
+                            animationType="fade"
+                        >
+                            <View style={styles.modalOverlay}>
+                                <View style={styles.modalContent}>
+                                    <View style={styles.modalHeader}>
+                                        <Text style={styles.modalTitle}>
+                                            {showStartDatePicker ? 'Select Start Date' : 'Select End Date'}
+                                        </Text>
+                                        <TouchableOpacity
+                                            onPress={() => {
+                                                setShowStartDatePicker(false);
+                                                setShowEndDatePicker(false);
+                                            }}
+                                        >
+                                            <MaterialIcons name="close" size={24} color="#FFFFFF" />
+                                        </TouchableOpacity>
+                                    </View>
+
+                                    <DateTimePicker
+                                        value={showStartDatePicker ? startDate : (endDate || new Date())}
+                                        mode="date"
+                                        display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                                        onChange={showStartDatePicker ? onStartDateChange : onEndDateChange}
+                                        minimumDate={showEndDatePicker ? startDate : undefined}
+                                        themeVariant="dark"
+                                        textColor="#FFFFFF"
+                                    />
+
+                                    <TouchableOpacity
+                                        style={[styles.modalDoneButton, { backgroundColor: selectedColor }]}
+                                        onPress={() => {
+                                            setShowStartDatePicker(false);
+                                            setShowEndDatePicker(false);
+                                        }}
+                                    >
+                                        <Text style={styles.modalDoneButtonText}>Confirm Date</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        </Modal>
                     </View>
 
                     <View style={styles.section}>
@@ -193,6 +325,96 @@ const styles = StyleSheet.create({
         fontWeight: '500',
         color: '#FFFFFF',
     },
+    sectionHeaderInner: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 12,
+    },
+    switchContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+    },
+    switchLabel: {
+        fontSize: 12,
+        color: '#9CA3AF',
+        fontWeight: '500',
+    },
+    durationCards: {
+        marginTop: 4,
+    },
+    dateCard: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#1C1C1E',
+        borderRadius: 20,
+        padding: 16,
+        borderWidth: 1,
+        borderColor: '#2C2C2E',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 8,
+    },
+    dateCardIcon: {
+        width: 44,
+        height: 44,
+        borderRadius: 12,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 16,
+    },
+    dateCardInfo: {
+        flex: 1,
+    },
+    dateCardLabel: {
+        fontSize: 11,
+        color: '#9CA3AF',
+        textTransform: 'uppercase',
+        letterSpacing: 0.5,
+        marginBottom: 2,
+    },
+    dateCardValue: {
+        fontSize: 17,
+        fontWeight: '600',
+        color: '#FFFFFF',
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        justifyContent: 'flex-end',
+    },
+    modalContent: {
+        backgroundColor: '#1C1C1E',
+        borderTopLeftRadius: 32,
+        borderTopRightRadius: 32,
+        padding: 24,
+        paddingBottom: Platform.OS === 'ios' ? 48 : 24,
+    },
+    modalHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 20,
+    },
+    modalTitle: {
+        fontSize: 20,
+        fontWeight: '700',
+        color: '#FFFFFF',
+    },
+    modalDoneButton: {
+        height: 60,
+        borderRadius: 18,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 20,
+    },
+    modalDoneButtonText: {
+        fontSize: 18,
+        fontWeight: '700',
+        color: '#FFFFFF',
+    },
     colorGrid: {
         flexDirection: 'row',
         flexWrap: 'wrap',
@@ -248,3 +470,4 @@ const styles = StyleSheet.create({
         color: '#FFFFFF',
     },
 });
+

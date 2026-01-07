@@ -10,10 +10,12 @@ interface HabitCardProps {
     color: string;
     percentage: number;
     completionData: Record<string, number>;
+    startDate: string;
+    endDate: string | null;
     onDelete: (id: string) => void;
 }
 
-const HabitCard: React.FC<HabitCardProps> = ({ id, name, icon, color, percentage, completionData, onDelete }) => {
+const HabitCard: React.FC<HabitCardProps> = ({ id, name, icon, color, percentage, completionData, startDate, endDate, onDelete }) => {
     const getIconColor = () => {
         // Now 'color' is expected to be a hex code
         return color.startsWith('#') ? color : '#6366F1';
@@ -24,13 +26,20 @@ const HabitCard: React.FC<HabitCardProps> = ({ id, name, icon, color, percentage
             <View style={styles.card}>
                 <View style={styles.header}>
                     <View style={styles.titleContainer}>
-                        <MaterialIcons name={icon as any} size={20} color={getIconColor()} />
+                        <View style={[styles.iconCircle, { backgroundColor: getIconColor() + '22' }]}>
+                            <MaterialIcons name="check-circle" size={18} color={getIconColor()} />
+                        </View>
                         <Text style={styles.title}>{name}</Text>
                     </View>
                     <Text style={styles.percentage}>{percentage}%</Text>
                 </View>
                 <View style={styles.heatmapContainer}>
-                    <Heatmap color={color} completionData={completionData} />
+                    <Heatmap
+                        color={color}
+                        completionData={completionData}
+                        startDate={startDate}
+                        endDate={endDate}
+                    />
                 </View>
             </View>
         </View>
@@ -39,18 +48,19 @@ const HabitCard: React.FC<HabitCardProps> = ({ id, name, icon, color, percentage
 
 const styles = StyleSheet.create({
     cardContainer: {
-        marginBottom: 8,
+        marginBottom: 16,
+        paddingHorizontal: 16,
     },
     card: {
         backgroundColor: '#1C1C1E',
-        borderTopWidth: 1,
-        borderBottomWidth: 1,
+        borderRadius: 16,
+        overflow: 'hidden',
+        borderWidth: 1,
         borderColor: '#2C2C2E',
     },
     header: {
         paddingHorizontal: 16,
-        paddingVertical: 12,
-        backgroundColor: '#1C1C1E',
+        paddingVertical: 14,
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
@@ -58,21 +68,31 @@ const styles = StyleSheet.create({
     titleContainer: {
         flexDirection: 'row',
         alignItems: 'center',
+        flex: 1,
+    },
+    iconCircle: {
+        width: 28,
+        height: 28,
+        borderRadius: 14,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 10,
     },
     title: {
-        fontSize: 12,
-        fontWeight: '700',
-        color: '#F3F4F6',
-        marginLeft: 8,
+        fontSize: 15,
+        fontWeight: '600',
+        color: '#FFFFFF',
+        flex: 1,
     },
     percentage: {
-        fontSize: 12,
+        fontSize: 15,
         fontWeight: '700',
         color: '#9CA3AF',
+        marginLeft: 12,
     },
     heatmapContainer: {
-        paddingBottom: 8,
-        backgroundColor: '#000000',
+        paddingBottom: 12,
+        alignItems: 'center',
     },
 });
 

@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { format, startOfToday, subDays } from 'date-fns';
+import { differenceInDays, format, parseISO, startOfToday, subDays } from 'date-fns';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
 export interface Habit {
@@ -7,6 +7,8 @@ export interface Habit {
     name: string;
     icon: string;
     color: string;
+    startDate: string;
+    endDate: string | null;
     createdAt: string;
     completionData: Record<string, number>;
 }
@@ -30,6 +32,8 @@ const MOCK_HABITS: Habit[] = [
         name: 'Drink Water - 8 cups per day',
         icon: 'local-drink',
         color: 'blue',
+        startDate: format(subDays(startOfToday(), 365), 'yyyy-MM-dd'),
+        endDate: null,
         createdAt: subDays(startOfToday(), 365).toISOString(),
         completionData: generateMockCompletionData(0.86),
     },
@@ -38,6 +42,8 @@ const MOCK_HABITS: Habit[] = [
         name: 'Read - 200 pages per week',
         icon: 'menu-book',
         color: 'red',
+        startDate: format(subDays(startOfToday(), 365), 'yyyy-MM-dd'),
+        endDate: null,
         createdAt: subDays(startOfToday(), 365).toISOString(),
         completionData: generateMockCompletionData(0.83),
     },
@@ -46,6 +52,8 @@ const MOCK_HABITS: Habit[] = [
         name: 'Stretch - 2 times per day',
         icon: 'accessibility',
         color: 'purple',
+        startDate: format(subDays(startOfToday(), 365), 'yyyy-MM-dd'),
+        endDate: null,
         createdAt: subDays(startOfToday(), 365).toISOString(),
         completionData: generateMockCompletionData(0.77),
     },
@@ -75,7 +83,17 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             try {
                 const stored = await AsyncStorage.getItem(HABITS_STORAGE_KEY);
                 if (stored) {
-                    setHabits(JSON.parse(stored));
+                    const parsedHabits = JSON.parse(stored);
+                    // Migration: Ensure all habits have startDate and endDate
+                    const migratedHabits = parsedHabits.map((h: any) => {
+                        const createdAt = h.createdAt ? new Date(h.createdAt) : startOfToday();
+                        return {
+                            ...h,
+                            startDate: h.startDate || format(createdAt, 'yyyy-MM-dd'),
+                            endDate: h.endDate || null,
+                        };
+                    });
+                    setHabits(migratedHabits);
                 } else {
                     setHabits(MOCK_HABITS);
                     await AsyncStorage.setItem(HABITS_STORAGE_KEY, JSON.stringify(MOCK_HABITS));
@@ -127,13 +145,23 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
 
     const calculatePercentage = (habit: Habit) => {
-        const data = habit.completionData;
-        const values = Object.values(data);
-        if (values.length === 0) return 0;
-        const completed = values.filter((v) => v > 0.5).length;
-        // Calculate based on last 365 days or just historical data? 
-        // For now, let's stick to the current logic but make sure it's consistent.
-        return Math.round((completed / Math.max(values.length, 1)) * 100);
+        const todayStr = format(startOfToday(), 'yyyy-MM-dd');
+        const start = habit.startDate;
+
+        // Calculate the effective end date for percentage (don't count future days)
+        const effectiveEnd = habit.endDate && habit.endDate < todayStr
+            ? habit.endDate
+            : todayStr;
+
+        if (effectiveEnd < start) return 0;
+
+        const completed = Object.entries(habit.completionData)
+            .filter(([date, v]) => v > 0.5 && date >= start && date <= effectiveEnd)
+            .length;
+
+        const daysInRange = differenceInDays(parseISO(effectiveEnd), parseISO(start)) + 1;
+
+        return Math.round((completed / Math.max(daysInRange, 1)) * 100);
     };
 
     return (

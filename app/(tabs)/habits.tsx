@@ -20,7 +20,11 @@ export default function HabitsScreen() {
     const router = useRouter();
     const [selectedDate, setSelectedDate] = useState(format(startOfToday(), 'yyyy-MM-dd'));
 
-    const completedCount = habits.filter(h => h.completionData[selectedDate] > 0.5).length;
+    const activeHabits = habits.filter(habit => {
+        const isAfterStart = selectedDate >= habit.startDate;
+        const isBeforeEnd = !habit.endDate || selectedDate <= habit.endDate;
+        return isAfterStart && isBeforeEnd;
+    });
 
     return (
         <SafeAreaView style={styles.container} edges={['top']}>
@@ -41,7 +45,7 @@ export default function HabitsScreen() {
                 </View>
 
                 <View style={styles.habitList}>
-                    {habits.map((habit) => (
+                    {activeHabits.map((habit) => (
                         <DailyHabitItem
                             key={habit.id}
                             id={habit.id}
@@ -52,9 +56,13 @@ export default function HabitsScreen() {
                             onDelete={deleteHabit}
                         />
                     ))}
-                    {habits.length === 0 && (
+                    {activeHabits.length === 0 && (
                         <View style={styles.emptyState}>
-                            <Text style={styles.emptyText}>No habits created yet. Tap + to start!</Text>
+                            <Text style={styles.emptyText}>
+                                {habits.length === 0
+                                    ? "No habits created yet. Tap + to start!"
+                                    : "No habits scheduled for this day."}
+                            </Text>
                         </View>
                     )}
                 </View>
