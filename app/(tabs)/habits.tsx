@@ -16,7 +16,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function HabitsScreen() {
-    const { habits, toggleHabitCompletion } = useHabits();
+    const { habits, toggleHabitCompletion, deleteHabit } = useHabits();
     const router = useRouter();
     const [selectedDate, setSelectedDate] = useState(format(startOfToday(), 'yyyy-MM-dd'));
 
@@ -49,6 +49,7 @@ export default function HabitsScreen() {
                             color={habit.color}
                             isCompleted={habit.completionData[selectedDate] > 0.5}
                             onToggle={(id) => toggleHabitCompletion(id, selectedDate)}
+                            onDelete={deleteHabit}
                         />
                     ))}
                     {habits.length === 0 && (

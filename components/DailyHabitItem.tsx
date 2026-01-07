@@ -1,6 +1,8 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import ReanimatedSwipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
+import Reanimated, { SharedValue, useAnimatedStyle } from 'react-native-reanimated';
 
 interface DailyHabitItemProps {
     id: string;
@@ -8,46 +10,80 @@ interface DailyHabitItemProps {
     color: string;
     isCompleted: boolean;
     onToggle: (id: string) => void;
+    onDelete: (id: string) => void;
 }
 
-const DailyHabitItem: React.FC<DailyHabitItemProps> = ({ id, name, color, isCompleted, onToggle }) => {
-    // We'll use the habit color as the base, but ensure it pops.
-    // In the mockup, 'Meditate' is peach and 'Drink Water' is blue.
-    // The user's habit color is already a hex.
+const RightAction = (prog: SharedValue<number>, drag: SharedValue<number>, onDelete: () => void) => {
+    const styleZIndex = useAnimatedStyle(() => {
+        return {
+            transform: [{ translateX: drag.value + 100 }],
+        };
+    });
 
     return (
-        <View style={[styles.container, { backgroundColor: color }]}>
-            <View style={styles.content}>
-                <Text
-                    style={[
-                        styles.habitName,
-                        isCompleted && styles.completedText
-                    ]}
-                    numberOfLines={1}
-                >
-                    {name}
-                </Text>
-            </View>
-            <TouchableOpacity
-                style={[
-                    styles.toggle,
-                    isCompleted ? styles.toggleActive : styles.toggleInactive
-                ]}
-                onPress={() => onToggle(id)}
-            >
-                {isCompleted && (
-                    <MaterialIcons name="check" size={16} color={color} />
-                )}
+        <Reanimated.View style={[styles.rightAction, styleZIndex]}>
+            <TouchableOpacity onPress={onDelete} style={styles.deleteButton}>
+                <MaterialIcons name="delete" size={24} color="#FFFFFF" />
             </TouchableOpacity>
-        </View>
+        </Reanimated.View>
+    );
+};
+
+const DailyHabitItem: React.FC<DailyHabitItemProps> = ({ id, name, color, isCompleted, onToggle, onDelete }) => {
+    const handleDelete = () => {
+        Alert.alert(
+            'Delete Habit',
+            `Are you sure you want to delete "${name}"?`,
+            [
+                { text: 'Cancel', style: 'cancel' },
+                { text: 'Delete', style: 'destructive', onPress: () => onDelete(id) },
+            ]
+        );
+    };
+
+    return (
+        <ReanimatedSwipeable
+            friction={2}
+            enableTrackpadTwoFingerGesture
+            rightThreshold={40}
+            renderRightActions={(prog, drag) => RightAction(prog, drag, handleDelete)}
+            containerStyle={styles.swipeContainer}
+        >
+            <View style={[styles.container, { backgroundColor: color }]}>
+                <View style={styles.content}>
+                    <Text
+                        style={[
+                            styles.habitName,
+                            isCompleted && styles.completedText
+                        ]}
+                        numberOfLines={1}
+                    >
+                        {name}
+                    </Text>
+                </View>
+                <TouchableOpacity
+                    style={[
+                        styles.toggle,
+                        isCompleted ? styles.toggleActive : styles.toggleInactive
+                    ]}
+                    onPress={() => onToggle(id)}
+                >
+                    {isCompleted && (
+                        <MaterialIcons name="check" size={16} color={color} />
+                    )}
+                </TouchableOpacity>
+            </View>
+        </ReanimatedSwipeable>
     );
 };
 
 const styles = StyleSheet.create({
+    swipeContainer: {
+        marginBottom: 12,
+    },
     container: {
         borderRadius: 20,
         padding: 20,
-        marginBottom: 12,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -85,6 +121,21 @@ const styles = StyleSheet.create({
     toggleActive: {
         backgroundColor: '#FFFFFF',
         borderColor: '#FFFFFF',
+    },
+    rightAction: {
+        width: 100,
+        height: '100%',
+        backgroundColor: '#EF4444',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderTopRightRadius: 20,
+        borderBottomRightRadius: 20,
+    },
+    deleteButton: {
+        width: '100%',
+        height: '100%',
+        justifyContent: 'center',
+        alignItems: 'center',
     },
 });
 

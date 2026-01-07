@@ -1,8 +1,6 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import React from 'react';
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import ReanimatedSwipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
-import Reanimated, { SharedValue, useAnimatedStyle } from 'react-native-reanimated';
+import { StyleSheet, Text, View } from 'react-native';
 import Heatmap from './Heatmap';
 
 interface HabitCardProps {
@@ -15,47 +13,14 @@ interface HabitCardProps {
     onDelete: (id: string) => void;
 }
 
-const RightAction = (prog: SharedValue<number>, drag: SharedValue<number>, onDelete: () => void) => {
-    const styleZIndex = useAnimatedStyle(() => {
-        return {
-            transform: [{ translateX: drag.value + 100 }],
-        };
-    });
-
-    return (
-        <Reanimated.View style={[styles.rightAction, styleZIndex]}>
-            <TouchableOpacity onPress={onDelete} style={styles.deleteButton}>
-                <MaterialIcons name="delete" size={24} color="#FFFFFF" />
-            </TouchableOpacity>
-        </Reanimated.View>
-    );
-};
-
 const HabitCard: React.FC<HabitCardProps> = ({ id, name, icon, color, percentage, completionData, onDelete }) => {
     const getIconColor = () => {
         // Now 'color' is expected to be a hex code
         return color.startsWith('#') ? color : '#6366F1';
     };
 
-    const handleDelete = () => {
-        Alert.alert(
-            'Delete Habit',
-            `Are you sure you want to delete "${name}"?`,
-            [
-                { text: 'Cancel', style: 'cancel' },
-                { text: 'Delete', style: 'destructive', onPress: () => onDelete(id) },
-            ]
-        );
-    };
-
     return (
-        <ReanimatedSwipeable
-            friction={2}
-            enableTrackpadTwoFingerGesture
-            rightThreshold={40}
-            renderRightActions={(prog, drag) => RightAction(prog, drag, handleDelete)}
-            containerStyle={styles.swipeContainer}
-        >
+        <View style={styles.cardContainer}>
             <View style={styles.card}>
                 <View style={styles.header}>
                     <View style={styles.titleContainer}>
@@ -68,12 +33,12 @@ const HabitCard: React.FC<HabitCardProps> = ({ id, name, icon, color, percentage
                     <Heatmap color={color} completionData={completionData} />
                 </View>
             </View>
-        </ReanimatedSwipeable>
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
-    swipeContainer: {
+    cardContainer: {
         marginBottom: 8,
     },
     card: {
@@ -108,19 +73,6 @@ const styles = StyleSheet.create({
     heatmapContainer: {
         paddingBottom: 8,
         backgroundColor: '#000000',
-    },
-    rightAction: {
-        width: 100,
-        height: '100%',
-        backgroundColor: '#EF4444',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    deleteButton: {
-        width: '100%',
-        height: '100%',
-        justifyContent: 'center',
-        alignItems: 'center',
     },
 });
 
