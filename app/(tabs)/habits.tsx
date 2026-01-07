@@ -50,6 +50,7 @@ export default function HabitsScreen() {
                             key={habit.id}
                             id={habit.id}
                             name={habit.name}
+                            icon={habit.icon}
                             color={habit.color}
                             isCompleted={habit.completionData[selectedDate] > 0.5}
                             onToggle={(id) => toggleHabitCompletion(id, selectedDate)}

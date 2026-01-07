@@ -7,6 +7,7 @@ import Reanimated, { SharedValue, useAnimatedStyle } from 'react-native-reanimat
 interface DailyHabitItemProps {
     id: string;
     name: string;
+    icon: string;
     color: string;
     isCompleted: boolean;
     onToggle: (id: string) => void;
@@ -29,7 +30,7 @@ const RightAction = (prog: SharedValue<number>, drag: SharedValue<number>, onDel
     );
 };
 
-const DailyHabitItem: React.FC<DailyHabitItemProps> = ({ id, name, color, isCompleted, onToggle, onDelete }) => {
+const DailyHabitItem: React.FC<DailyHabitItemProps> = ({ id, name, icon, color, isCompleted, onToggle, onDelete }) => {
     const handleDelete = () => {
         Alert.alert(
             'Delete Habit',
@@ -51,15 +52,23 @@ const DailyHabitItem: React.FC<DailyHabitItemProps> = ({ id, name, color, isComp
         >
             <View style={[styles.container, { backgroundColor: color }]}>
                 <View style={styles.content}>
-                    <Text
-                        style={[
-                            styles.habitName,
-                            isCompleted && styles.completedText
-                        ]}
-                        numberOfLines={1}
-                    >
-                        {name}
-                    </Text>
+                    <View style={styles.nameContainer}>
+                        <MaterialIcons
+                            name={icon as any}
+                            size={20}
+                            color="#000000"
+                            style={styles.habitIcon}
+                        />
+                        <Text
+                            style={[
+                                styles.habitName,
+                                isCompleted && styles.completedText
+                            ]}
+                            numberOfLines={1}
+                        >
+                            {name}
+                        </Text>
+                    </View>
                 </View>
                 <TouchableOpacity
                     style={[
@@ -98,10 +107,19 @@ const styles = StyleSheet.create({
     content: {
         flex: 1,
     },
+    nameContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    habitIcon: {
+        marginRight: 10,
+        opacity: 0.8,
+    },
     habitName: {
         fontSize: 16,
         fontWeight: '600',
         color: '#000000',
+        flex: 1,
     },
     completedText: {
         opacity: 0.6,

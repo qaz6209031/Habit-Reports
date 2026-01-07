@@ -27,7 +27,7 @@ const HabitCard: React.FC<HabitCardProps> = ({ id, name, icon, color, percentage
                 <View style={styles.header}>
                     <View style={styles.titleContainer}>
                         <View style={[styles.iconCircle, { backgroundColor: getIconColor() + '22' }]}>
-                            <MaterialIcons name="check-circle" size={18} color={getIconColor()} />
+                            <MaterialIcons name={icon as any} size={18} color={getIconColor()} />
                         </View>
                         <Text style={styles.title}>{name}</Text>
                     </View>
