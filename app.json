@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "HabitTrackerAntiGravity",
-    "slug": "HabitTrackerAntiGravity",
+    "name": "HabitReport",
+    "slug": "habitreport",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
