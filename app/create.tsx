@@ -253,7 +253,9 @@ export default function CreateHabitScreen() {
                                         selectedColor === color && styles.selectedColor,
                                     ]}
                                     onPress={() => setSelectedColor(color)}
-                                />
+                                >
+                                    {selectedColor === color && <View style={styles.selectedIndicator} />}
+                                </TouchableOpacity>
                             ))}
                         </View>
                     </View>
@@ -443,22 +445,30 @@ const styles = StyleSheet.create({
     colorGrid: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        gap: 12,
+        gap: 10,
         backgroundColor: '#1C1C1E',
-        borderRadius: 16,
+        borderRadius: 24,
         padding: 16,
-        justifyContent: 'center',
+        justifyContent: 'space-between',
     },
     colorCircle: {
-        width: 44,
-        height: 44,
-        borderRadius: 22,
+        width: '12.5%', // Fits 7 in a row with gap
+        aspectRatio: 1,
+        borderRadius: 12,
         borderWidth: 2,
         borderColor: 'transparent',
     },
     selectedColor: {
         borderColor: '#FFFFFF',
         transform: [{ scale: 1.1 }],
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    selectedIndicator: {
+        width: 12,
+        height: 12,
+        backgroundColor: '#000000',
+        borderRadius: 4,
     },
     iconGrid: {
         flexDirection: 'row',
