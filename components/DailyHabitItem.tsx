@@ -12,25 +12,29 @@ interface DailyHabitItemProps {
     isCompleted: boolean;
     onToggle: (id: string) => void;
     onDelete: (id: string) => void;
+    onEdit: (id: string) => void;
 }
 
-const RightAction = (prog: SharedValue<number>, drag: SharedValue<number>, onDelete: () => void) => {
+const RightAction = (prog: SharedValue<number>, drag: SharedValue<number>, onDelete: () => void, onEdit: () => void) => {
     const styleZIndex = useAnimatedStyle(() => {
         return {
-            transform: [{ translateX: drag.value + 100 }],
+            transform: [{ translateX: drag.value + 160 }],
         };
     });
 
     return (
-        <Reanimated.View style={[styles.rightAction, styleZIndex]}>
-            <TouchableOpacity onPress={onDelete} style={styles.deleteButton}>
-                <MaterialIcons name="delete" size={24} color="#FFFFFF" />
+        <Reanimated.View style={[styles.rightActionContainer, styleZIndex]}>
+            <TouchableOpacity onPress={onEdit} style={[styles.actionButton, styles.editButton]}>
+                <MaterialIcons name="edit" size={22} color="#FFFFFF" />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={onDelete} style={[styles.actionButton, styles.deleteButton]}>
+                <MaterialIcons name="delete" size={22} color="#FFFFFF" />
             </TouchableOpacity>
         </Reanimated.View>
     );
 };
 
-const DailyHabitItem: React.FC<DailyHabitItemProps> = ({ id, name, icon, color, isCompleted, onToggle, onDelete }) => {
+const DailyHabitItem: React.FC<DailyHabitItemProps> = ({ id, name, icon, color, isCompleted, onToggle, onDelete, onEdit }) => {
     const handleDelete = () => {
         Alert.alert(
             'Delete Habit',
@@ -47,7 +51,7 @@ const DailyHabitItem: React.FC<DailyHabitItemProps> = ({ id, name, icon, color, 
             friction={2}
             enableTrackpadTwoFingerGesture
             rightThreshold={40}
-            renderRightActions={(prog, drag) => RightAction(prog, drag, handleDelete)}
+            renderRightActions={(prog, drag) => RightAction(prog, drag, handleDelete, () => onEdit(id))}
             containerStyle={styles.swipeContainer}
         >
             <View style={[styles.container, { backgroundColor: color }]}>
@@ -140,20 +144,26 @@ const styles = StyleSheet.create({
         backgroundColor: '#FFFFFF',
         borderColor: '#FFFFFF',
     },
-    rightAction: {
-        width: 100,
+    rightActionContainer: {
+        width: 160,
         height: '100%',
+        flexDirection: 'row',
         backgroundColor: '#EF4444',
-        justifyContent: 'center',
-        alignItems: 'center',
         borderTopRightRadius: 20,
         borderBottomRightRadius: 20,
+        overflow: 'hidden',
     },
-    deleteButton: {
-        width: '100%',
+    actionButton: {
+        width: 80,
         height: '100%',
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    editButton: {
+        backgroundColor: '#4B5563', // Grayish for edit
+    },
+    deleteButton: {
+        backgroundColor: '#EF4444',
     },
 });
 

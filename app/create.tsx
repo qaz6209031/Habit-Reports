@@ -1,8 +1,8 @@
 import { useHabits } from '@/context/HabitContext';
 import { MaterialIcons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { addMonths, format, startOfToday } from 'date-fns';
-import { useRouter } from 'expo-router';
+import { addMonths, format, parseISO, startOfToday } from 'date-fns';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
     KeyboardAvoidingView,
@@ -50,8 +50,27 @@ export default function CreateHabitScreen() {
     const [showEndDatePicker, setShowEndDatePicker] = useState(false);
     const [selectedColor, setSelectedColor] = useState(COLORS[0]);
     const [selectedIcon, setSelectedIcon] = useState('water-drop');
-    const { addHabit } = useHabits();
+    const { habits, addHabit, updateHabit } = useHabits();
     const router = useRouter();
+    const { id } = useLocalSearchParams<{ id: string }>();
+    const isEditing = !!id;
+
+    // Load existing habit data if editing
+    React.useEffect(() => {
+        if (isEditing && id) {
+            const habit = habits.find((h) => h.id === id);
+            if (habit) {
+                setName(habit.name);
+                setSelectedColor(habit.color);
+                setSelectedIcon(habit.icon);
+                setStartDate(parseISO(habit.startDate));
+                if (habit.endDate) {
+                    setEndDate(parseISO(habit.endDate));
+                    setHasEndDate(true);
+                }
+            }
+        }
+    }, [id, isEditing]);
 
     const handleToggleEndDate = (value: boolean) => {
         setHasEndDate(value);
@@ -62,15 +81,22 @@ export default function CreateHabitScreen() {
         }
     };
 
-    const handleCreate = async () => {
+    const handleSave = async () => {
         if (!name.trim()) return;
-        await addHabit({
+
+        const habitData = {
             name,
             color: selectedColor,
             icon: selectedIcon,
             startDate: format(startDate, 'yyyy-MM-dd'),
             endDate: endDate ? format(endDate, 'yyyy-MM-dd') : null,
-        });
+        };
+
+        if (isEditing && id) {
+            await updateHabit(id, habitData);
+        } else {
+            await addHabit(habitData);
+        }
         router.back();
     };
 
@@ -103,7 +129,7 @@ export default function CreateHabitScreen() {
                     <TouchableOpacity onPress={() => router.back()} style={styles.closeButton}>
                         <MaterialIcons name="close" size={24} color="#9CA3AF" />
                     </TouchableOpacity>
-                    <Text style={styles.headerTitle}>New Habit</Text>
+                    <Text style={styles.headerTitle}>{isEditing ? 'Edit Habit' : 'New Habit'}</Text>
                     <View style={styles.spacer} />
                 </View>
 
@@ -257,9 +283,9 @@ export default function CreateHabitScreen() {
                 </ScrollView>
 
                 <View style={styles.footer}>
-                    <TouchableOpacity style={styles.createButton} onPress={handleCreate}>
-                        <MaterialIcons name="check" size={24} color="#FFFFFF" />
-                        <Text style={styles.createButtonText}>Create Habit</Text>
+                    <TouchableOpacity style={[styles.createButton, isEditing && { backgroundColor: '#4B5563' }]} onPress={handleSave}>
+                        <MaterialIcons name={isEditing ? 'save' : 'check'} size={24} color="#FFFFFF" />
+                        <Text style={styles.createButtonText}>{isEditing ? 'Save Changes' : 'Create Habit'}</Text>
                     </TouchableOpacity>
                 </View>
             </KeyboardAvoidingView>

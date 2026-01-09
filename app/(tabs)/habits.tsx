@@ -55,6 +55,7 @@ export default function HabitsScreen() {
                             isCompleted={habit.completionData[selectedDate] > 0.5}
                             onToggle={(id) => toggleHabitCompletion(id, selectedDate)}
                             onDelete={deleteHabit}
+                            onEdit={(id) => router.push({ pathname: '/create', params: { id } })}
                         />
                     ))}
                     {activeHabits.length === 0 && (

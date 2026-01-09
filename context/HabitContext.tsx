@@ -18,6 +18,7 @@ interface HabitContextType {
     loading: boolean;
     addHabit: (habit: Omit<Habit, 'id' | 'createdAt' | 'completionData'>) => Promise<void>;
     deleteHabit: (habitId: string) => Promise<void>;
+    updateHabit: (habitId: string, updates: Partial<Omit<Habit, 'id' | 'createdAt' | 'completionData'>>) => Promise<void>;
     toggleHabitCompletion: (habitId: string, date: string) => Promise<void>;
     calculatePercentage: (habit: Habit) => number;
 }
@@ -125,6 +126,12 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         await AsyncStorage.setItem(HABITS_STORAGE_KEY, JSON.stringify(updatedHabits));
     };
 
+    const updateHabit = async (habitId: string, updates: Partial<Omit<Habit, 'id' | 'createdAt' | 'completionData'>>) => {
+        const updatedHabits = habits.map((h) => (h.id === habitId ? { ...h, ...updates } : h));
+        setHabits(updatedHabits);
+        await AsyncStorage.setItem(HABITS_STORAGE_KEY, JSON.stringify(updatedHabits));
+    };
+
     const toggleHabitCompletion = async (habitId: string, date: string) => {
         const updatedHabits = habits.map((habit) => {
             if (habit.id === habitId) {
@@ -165,7 +172,7 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
 
     return (
-        <HabitContext.Provider value={{ habits, loading, addHabit, deleteHabit, toggleHabitCompletion, calculatePercentage }}>
+        <HabitContext.Provider value={{ habits, loading, addHabit, deleteHabit, updateHabit, toggleHabitCompletion, calculatePercentage }}>
             {children}
         </HabitContext.Provider>
     );
