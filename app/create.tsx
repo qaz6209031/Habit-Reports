@@ -15,6 +15,7 @@ import {
     Text,
     TextInput,
     TouchableOpacity,
+    useWindowDimensions,
     View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -41,6 +42,9 @@ const ICONS = [
 ];
 
 export default function CreateHabitScreen() {
+    const { width: windowWidth } = useWindowDimensions();
+    const COLOR_ITEM_SIZE = (windowWidth - 40 - 32 - 48) / 7; // 40(content pad) + 32(grid pad) + 48(6 gaps of 8px)
+
     const [name, setName] = useState('');
     const [startDate, setStartDate] = useState(startOfToday());
     const [endDate, setEndDate] = useState<Date | null>(null);
@@ -249,7 +253,7 @@ export default function CreateHabitScreen() {
                                     key={color}
                                     style={[
                                         styles.colorCircle,
-                                        { backgroundColor: color },
+                                        { backgroundColor: color, width: COLOR_ITEM_SIZE, height: COLOR_ITEM_SIZE },
                                         selectedColor === color && styles.selectedColor,
                                     ]}
                                     onPress={() => setSelectedColor(color)}
@@ -445,30 +449,27 @@ const styles = StyleSheet.create({
     colorGrid: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        gap: 10,
         backgroundColor: '#1C1C1E',
         borderRadius: 24,
         padding: 16,
-        justifyContent: 'space-between',
+        gap: 8,
     },
     colorCircle: {
-        width: '12.5%', // Fits 7 in a row with gap
-        aspectRatio: 1,
-        borderRadius: 12,
+        borderRadius: 10,
         borderWidth: 2,
         borderColor: 'transparent',
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     selectedColor: {
         borderColor: '#FFFFFF',
         transform: [{ scale: 1.1 }],
-        alignItems: 'center',
-        justifyContent: 'center',
     },
     selectedIndicator: {
-        width: 12,
-        height: 12,
+        width: 10,
+        height: 10,
         backgroundColor: '#000000',
-        borderRadius: 4,
+        borderRadius: 3,
     },
     iconGrid: {
         flexDirection: 'row',
