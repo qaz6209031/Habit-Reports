@@ -20,10 +20,9 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const COLORS = [
-    '#3B82F6', '#EF4444', '#A855F7', '#14B8A6', '#F97316', '#6366F1',
-    '#10B981', '#F43F5E', '#8B5CF6', '#06B6D4', '#EAB308', '#64748B',
-    '#EC4899', '#0EA5E9', '#D946EF', '#84CC16', '#F59E0B', '#475569',
-    '#C026D3', '#2563EB', '#7C3AED', '#059669', '#DC2626', '#1E293B', '#78350F'
+    '#FB7185', '#FB923C', '#FBBF24', '#FACC15', '#A3E635', '#4ADE80', '#2DD4BF',
+    '#22D3EE', '#38BDF8', '#60A5FA', '#818CF8', '#A78BFA', '#C084FC', '#E879F9',
+    '#F472B6', '#FDA4AF', '#F9A8D4', '#FCA5A5', '#94A3B8', '#9CA3AF', '#78716C'
 ];
 
 const ICONS = [
