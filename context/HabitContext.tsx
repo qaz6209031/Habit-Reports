@@ -130,7 +130,7 @@ const MOCK_HABITS: Habit[] = [
     },
 ];
 
-function generateMockCompletionData(probability: number, baseIntensity: number): Record<string, number> {
+function generateMockCompletionData(probability: number, _baseIntensity: number): Record<string, number> {
     const data: Record<string, number> = {};
     const today = startOfToday();
     const yearStart = startOfYear(today);
@@ -148,11 +148,11 @@ function generateMockCompletionData(probability: number, baseIntensity: number):
         if (dayOfWeek === 0 || dayOfWeek === 6) adjustedProb -= 0.1; // Weekends
 
         if (Math.random() < adjustedProb) {
-            // High intensity / completed
-            data[dateStr] = Math.max(0.4, Math.min(1.0, baseIntensity + (Math.random() - 0.5) * 0.4));
-        } else if (Math.random() < 0.3) {
-            // Low intensity / partial
-            data[dateStr] = Math.random() * 0.3;
+            // YES: Full color
+            data[dateStr] = 1;
+        } else {
+            // NO: Black
+            data[dateStr] = 0;
         }
     }
     return data;
