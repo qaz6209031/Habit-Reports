@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { differenceInDays, format, parseISO, startOfToday, subDays } from 'date-fns';
+import { addDays, differenceInDays, format, parseISO, startOfToday, startOfYear } from 'date-fns';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
 export interface Habit {
@@ -30,45 +30,128 @@ const HABITS_STORAGE_KEY = '@habits_data';
 const MOCK_HABITS: Habit[] = [
     {
         id: '1',
-        name: 'Drink Water - 8 cups per day',
-        icon: 'local-drink',
-        color: 'blue',
-        startDate: format(subDays(startOfToday(), 365), 'yyyy-MM-dd'),
+        name: 'Morning Meditation',
+        icon: 'Sun',
+        color: '#FBBF24',
+        startDate: format(startOfYear(startOfToday()), 'yyyy-MM-dd'),
         endDate: null,
-        createdAt: subDays(startOfToday(), 365).toISOString(),
-        completionData: generateMockCompletionData(0.86),
+        createdAt: startOfYear(startOfToday()).toISOString(),
+        completionData: generateMockCompletionData(0.92, 0.8),
     },
     {
         id: '2',
-        name: 'Read - 200 pages per week',
-        icon: 'menu-book',
-        color: 'red',
-        startDate: format(subDays(startOfToday(), 365), 'yyyy-MM-dd'),
+        name: 'Gym Session',
+        icon: 'Dumbbell',
+        color: '#EF4444',
+        startDate: format(startOfYear(startOfToday()), 'yyyy-MM-dd'),
         endDate: null,
-        createdAt: subDays(startOfToday(), 365).toISOString(),
-        completionData: generateMockCompletionData(0.83),
+        createdAt: startOfYear(startOfToday()).toISOString(),
+        completionData: generateMockCompletionData(0.65, 0.9),
     },
     {
         id: '3',
-        name: 'Stretch - 2 times per day',
-        icon: 'accessibility',
-        color: 'purple',
-        startDate: format(subDays(startOfToday(), 365), 'yyyy-MM-dd'),
+        name: 'Read Book',
+        icon: 'BookOpen',
+        color: '#3B82F6',
+        startDate: format(startOfYear(startOfToday()), 'yyyy-MM-dd'),
         endDate: null,
-        createdAt: subDays(startOfToday(), 365).toISOString(),
-        completionData: generateMockCompletionData(0.77),
+        createdAt: startOfYear(startOfToday()).toISOString(),
+        completionData: generateMockCompletionData(0.85, 0.7),
+    },
+    {
+        id: '4',
+        name: 'Drink Water',
+        icon: '💧',
+        color: '#60A5FA',
+        startDate: format(startOfYear(startOfToday()), 'yyyy-MM-dd'),
+        endDate: null,
+        createdAt: startOfYear(startOfToday()).toISOString(),
+        completionData: generateMockCompletionData(0.95, 1.0),
+    },
+    {
+        id: '5',
+        name: 'Coding',
+        icon: 'Code2',
+        color: '#8B5CF6',
+        startDate: format(startOfYear(startOfToday()), 'yyyy-MM-dd'),
+        endDate: null,
+        createdAt: startOfYear(startOfToday()).toISOString(),
+        completionData: generateMockCompletionData(0.80, 0.85),
+    },
+    {
+        id: '6',
+        name: 'Healthy Meal',
+        icon: '🥗',
+        color: '#10B981',
+        startDate: format(startOfYear(startOfToday()), 'yyyy-MM-dd'),
+        endDate: null,
+        createdAt: startOfYear(startOfToday()).toISOString(),
+        completionData: generateMockCompletionData(0.88, 0.9),
+    },
+    {
+        id: '7',
+        name: 'Walk Dog',
+        icon: '🦮',
+        color: '#F59E0B',
+        startDate: format(startOfYear(startOfToday()), 'yyyy-MM-dd'),
+        endDate: null,
+        createdAt: startOfYear(startOfToday()).toISOString(),
+        completionData: generateMockCompletionData(0.98, 0.95),
+    },
+    {
+        id: '8',
+        name: 'Deep Work',
+        icon: 'Target',
+        color: '#EC4899',
+        startDate: format(startOfYear(startOfToday()), 'yyyy-MM-dd'),
+        endDate: null,
+        createdAt: startOfYear(startOfToday()).toISOString(),
+        completionData: generateMockCompletionData(0.75, 0.8),
+    },
+    {
+        id: '9',
+        name: 'Journaling',
+        icon: 'PenTool',
+        color: '#6366F1',
+        startDate: format(startOfYear(startOfToday()), 'yyyy-MM-dd'),
+        endDate: null,
+        createdAt: startOfYear(startOfToday()).toISOString(),
+        completionData: generateMockCompletionData(0.70, 0.6),
+    },
+    {
+        id: '10',
+        name: 'Stretch',
+        icon: 'Activity',
+        color: '#14B8A6',
+        startDate: format(startOfYear(startOfToday()), 'yyyy-MM-dd'),
+        endDate: null,
+        createdAt: startOfYear(startOfToday()).toISOString(),
+        completionData: generateMockCompletionData(0.82, 0.75),
     },
 ];
 
-function generateMockCompletionData(percentage: number): Record<string, number> {
+function generateMockCompletionData(probability: number, baseIntensity: number): Record<string, number> {
     const data: Record<string, number> = {};
     const today = startOfToday();
-    for (let i = 0; i < 365; i++) {
-        const date = subDays(today, i);
+    const yearStart = startOfYear(today);
+
+    // Generate data for the entire current year (365 or 366 days)
+    for (let i = 0; i < 366; i++) {
+        const date = addDays(yearStart, i);
+        if (date.getFullYear() !== yearStart.getFullYear()) break;
+
         const dateStr = format(date, 'yyyy-MM-dd');
-        if (Math.random() < percentage) {
-            data[dateStr] = Math.random() * 0.5 + 0.5;
-        } else {
+
+        // Add some noise to the probability based on the day of the week
+        const dayOfWeek = date.getDay();
+        let adjustedProb = probability;
+        if (dayOfWeek === 0 || dayOfWeek === 6) adjustedProb -= 0.1; // Weekends
+
+        if (Math.random() < adjustedProb) {
+            // High intensity / completed
+            data[dateStr] = Math.max(0.4, Math.min(1.0, baseIntensity + (Math.random() - 0.5) * 0.4));
+        } else if (Math.random() < 0.3) {
+            // Low intensity / partial
             data[dateStr] = Math.random() * 0.3;
         }
     }
@@ -83,7 +166,11 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         const loadHabits = async () => {
             try {
                 const stored = await AsyncStorage.getItem(HABITS_STORAGE_KEY);
-                if (stored) {
+                // For screenshot/demo purposes: If storage is empty OR if we want to force refresh
+                // the user can trigger this by clearing app data or we can force it here once.
+                const FORCE_REFRESH_DEMO = true; // Set to true to inject our new colorful data
+
+                if (stored && !FORCE_REFRESH_DEMO) {
                     const parsedHabits = JSON.parse(stored);
                     // Migration: Ensure all habits have startDate and endDate
                     const migratedHabits = parsedHabits.map((h: any) => {
