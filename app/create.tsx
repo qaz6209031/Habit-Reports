@@ -1,8 +1,11 @@
+import IconEmojiSelector from '@/components/IconEmojiSelector';
 import { useHabits } from '@/context/HabitContext';
 import { MaterialIcons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { addMonths, format, parseISO, startOfToday } from 'date-fns';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import * as LucideIcons from 'lucide-react-native';
+import { Activity } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
     KeyboardAvoidingView,
@@ -26,20 +29,7 @@ const COLORS = [
     '#F472B6', '#FDA4AF', '#F9A8D4', '#FCA5A5', '#94A3B8', '#9CA3AF', '#78716C'
 ];
 
-const ICONS = [
-    'fitness-center', 'menu-book', 'water-drop', 'self-improvement', 'bedtime',
-    'savings', 'code', 'palette', 'local-florist', 'directions-run',
-    'restaurant', 'local-cafe', 'timer', 'language', 'brush',
-    'create', 'lightbulb', 'music-note', 'camera-alt', 'explore',
-    'favorite', 'stars', 'work', 'school', 'pets',
-    'shopping-cart', 'chat', 'call', 'mail', 'map',
-    'cloud', 'beach-access', 'pool', 'mountain', 'terrain',
-    'bicycle', 'car-rental', 'flight', 'train', 'subway',
-    'weekend', 'home', 'apartment', 'business', 'public',
-    'vpn-key', 'lock', 'security', 'verified-user', 'fingerprint',
-    'headset', 'mic', 'videogame-asset', 'tv', 'speaker',
-    'laptop', 'smartphone', 'watch', 'mouse', 'keyboard',
-];
+const ICONS = []; // Removed old MaterialIcons grid
 
 export default function CreateHabitScreen() {
     const { width: windowWidth } = useWindowDimensions();
@@ -52,7 +42,9 @@ export default function CreateHabitScreen() {
     const [showStartDatePicker, setShowStartDatePicker] = useState(false);
     const [showEndDatePicker, setShowEndDatePicker] = useState(false);
     const [selectedColor, setSelectedColor] = useState(COLORS[0]);
-    const [selectedIcon, setSelectedIcon] = useState('water-drop');
+    const [selectedIcon, setSelectedIcon] = useState('Activity');
+    const [selectedIconType, setSelectedIconType] = useState<'icon' | 'emoji'>('icon');
+    const [showIconSelector, setShowIconSelector] = useState(false);
     const { habits, addHabit, updateHabit } = useHabits();
     const router = useRouter();
     const { id } = useLocalSearchParams<{ id: string }>();
@@ -147,7 +139,14 @@ export default function CreateHabitScreen() {
                                 value={name}
                                 onChangeText={setName}
                             />
-                            <MaterialIcons name="edit" size={20} color={selectedColor} />
+                            {selectedIconType === 'icon' ? (
+                                (() => {
+                                    const IconComponent = (LucideIcons as any)[selectedIcon];
+                                    return IconComponent ? <IconComponent size={24} color={selectedColor} strokeWidth={2} /> : null;
+                                })()
+                            ) : (
+                                <Text style={{ fontSize: 24 }}>{selectedIcon}</Text>
+                            )}
                         </View>
                     </View>
 
@@ -266,25 +265,55 @@ export default function CreateHabitScreen() {
 
                     <View style={styles.section}>
                         <Text style={styles.label}>Habit Icon</Text>
-                        <View style={styles.iconGrid}>
-                            {ICONS.map((icon) => (
-                                <TouchableOpacity
-                                    key={icon}
-                                    style={[
-                                        styles.iconButton,
-                                        selectedIcon === icon && { backgroundColor: selectedColor, borderColor: selectedColor },
-                                    ]}
-                                    onPress={() => setSelectedIcon(icon)}
-                                >
-                                    <MaterialIcons
-                                        name={icon as any}
-                                        size={30}
-                                        color={selectedIcon === icon ? '#FFFFFF' : '#9CA3AF'}
-                                    />
-                                </TouchableOpacity>
-                            ))}
+                        <View style={styles.iconSelectionWrapper}>
+                            <View style={styles.backgroundIconsContainer}>
+                                {[
+                                    ['Activity', 'Dumbbell', 'Bike', 'Run', 'Waves', 'Mountain', 'Tent', 'Compass'],
+                                    ['Heart', 'Smile', 'Sun', 'Moon', 'Zap', 'Shield', 'LifeBuoy', 'Medal'],
+                                    ['Clock', 'Calendar', 'Timer', 'CheckCircle2', 'ListTodo', 'BarChart3', 'Link', 'Database'],
+                                    ['Home', 'Lamp', 'Bed', 'Bath', 'Trash2', 'Wrench', 'Hammer', 'Car']
+                                ].map((row, i) => (
+                                    <View key={i} style={styles.backgroundIconsRow}>
+                                        {row.map((icon, j) => {
+                                            const IconComp = (LucideIcons as any)[icon];
+                                            return IconComp ? <IconComp key={j} size={20} color="#FFFFFF" strokeWidth={1} /> : null;
+                                        })}
+                                    </View>
+                                ))}
+                            </View>
+                            <TouchableOpacity
+                                style={[styles.pulseContainer, { shadowColor: selectedColor }]}
+                                onPress={() => setShowIconSelector(true)}
+                            >
+                                <View style={[styles.pulseCircle, { backgroundColor: selectedColor }]}>
+                                    {selectedIconType === 'icon' ? (
+                                        (() => {
+                                            const IconComponent = (LucideIcons as any)[selectedIcon];
+                                            return IconComponent ? <IconComponent size={32} color="#FFFFFF" strokeWidth={2} /> : <Activity size={32} color="#FFFFFF" />;
+                                        })()
+                                    ) : (
+                                        <Text style={{ fontSize: 32 }}>{selectedIcon}</Text>
+                                    )}
+                                </View>
+                            </TouchableOpacity>
                         </View>
                     </View>
+
+                    <Modal
+                        visible={showIconSelector}
+                        animationType="slide"
+                        presentationStyle="pageSheet"
+                    >
+                        <IconEmojiSelector
+                            onClose={() => setShowIconSelector(false)}
+                            onSelect={(item, type) => {
+                                setSelectedIcon(item);
+                                setSelectedIconType(type);
+                                setShowIconSelector(false);
+                            }}
+                            selectedColor={selectedColor}
+                        />
+                    </Modal>
                 </ScrollView>
 
                 <View style={styles.footer}>
@@ -470,6 +499,49 @@ const styles = StyleSheet.create({
         height: 10,
         backgroundColor: '#000000',
         borderRadius: 3,
+    },
+    iconSelectionWrapper: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 40,
+        marginTop: 20,
+        position: 'relative',
+        overflow: 'hidden',
+    },
+    backgroundIconsContainer: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    backgroundIconsRow: {
+        flexDirection: 'row',
+        gap: 20,
+        marginBottom: 20,
+        opacity: 0.25,
+    },
+    pulseContainer: {
+        width: 100,
+        height: 100,
+        borderRadius: 50,
+        justifyContent: 'center',
+        alignItems: 'center',
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.5,
+        shadowRadius: 15,
+        elevation: 10,
+    },
+    pulseCircle: {
+        width: 80,
+        height: 80,
+        borderRadius: 40,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 4,
+        borderColor: 'rgba(255, 255, 255, 0.2)',
     },
     iconGrid: {
         flexDirection: 'row',

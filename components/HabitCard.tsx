@@ -1,4 +1,5 @@
 import { MaterialIcons } from '@expo/vector-icons';
+import * as LucideIcons from 'lucide-react-native';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Heatmap from './Heatmap';
@@ -27,7 +28,17 @@ const HabitCard: React.FC<HabitCardProps> = ({ id, name, icon, color, percentage
                 <View style={styles.header}>
                     <View style={styles.titleContainer}>
                         <View style={[styles.iconCircle, { backgroundColor: getIconColor() + '22' }]}>
-                            <MaterialIcons name={icon as any} size={18} color={getIconColor()} />
+                            {(() => {
+                                const IconComponent = (LucideIcons as any)[icon];
+                                if (IconComponent) {
+                                    return <IconComponent size={16} color={getIconColor()} strokeWidth={2} />;
+                                }
+                                // If not a Lucide icon, assume it's an emoji or MaterialIcon
+                                if (icon.length > 2 || !/\p{Emoji}/u.test(icon)) {
+                                    return <MaterialIcons name={icon as any} size={18} color={getIconColor()} />;
+                                }
+                                return <Text style={{ fontSize: 16 }}>{icon}</Text>
+                            })()}
                         </View>
                         <Text style={styles.title}>{name}</Text>
                     </View>

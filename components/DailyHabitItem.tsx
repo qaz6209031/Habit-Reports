@@ -1,4 +1,5 @@
 import { MaterialIcons } from '@expo/vector-icons';
+import * as LucideIcons from 'lucide-react-native';
 import React from 'react';
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import ReanimatedSwipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
@@ -57,12 +58,23 @@ const DailyHabitItem: React.FC<DailyHabitItemProps> = ({ id, name, icon, color, 
             <View style={[styles.container, { backgroundColor: color }]}>
                 <View style={styles.content}>
                     <View style={styles.nameContainer}>
-                        <MaterialIcons
-                            name={icon as any}
-                            size={20}
-                            color="#000000"
-                            style={styles.habitIcon}
-                        />
+                        {(() => {
+                            const IconComponent = (LucideIcons as any)[icon];
+                            if (IconComponent) {
+                                return <IconComponent size={20} color="#000000" strokeWidth={2} style={styles.habitIcon} />;
+                            }
+                            if (icon.length > 2 || !/\p{Emoji}/u.test(icon)) {
+                                return (
+                                    <MaterialIcons
+                                        name={icon as any}
+                                        size={20}
+                                        color="#000000"
+                                        style={styles.habitIcon}
+                                    />
+                                );
+                            }
+                            return <Text style={[styles.habitIcon, { fontSize: 20 }]}>{icon}</Text>;
+                        })()}
                         <Text
                             style={[
                                 styles.habitName,
