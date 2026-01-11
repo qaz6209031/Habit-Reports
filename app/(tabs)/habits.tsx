@@ -65,6 +65,9 @@ export default function HabitsScreen() {
                                     ? "No habits created yet. Tap + to start!"
                                     : "No habits scheduled for this day."}
                             </Text>
+                            <Text style={styles.hintText}>
+                                Swipe right on any habit to edit or delete it.
+                            </Text>
                         </View>
                     )}
                 </View>
@@ -133,6 +136,13 @@ const styles = StyleSheet.create({
         color: '#71717A',
         fontSize: 16,
         textAlign: 'center',
+    },
+    hintText: {
+        color: '#3F3F46',
+        fontSize: 13,
+        textAlign: 'center',
+        marginTop: 12,
+        fontStyle: 'italic',
     },
     fab: {
         position: 'absolute',

@@ -27,38 +27,7 @@ const HabitContext = createContext<HabitContextType | undefined>(undefined);
 
 const HABITS_STORAGE_KEY = '@habits_data';
 
-const MOCK_HABITS: Habit[] = [
-    {
-        id: '1',
-        name: 'Drink Water - 8 cups per day',
-        icon: 'local-drink',
-        color: 'blue',
-        startDate: format(subDays(startOfToday(), 365), 'yyyy-MM-dd'),
-        endDate: null,
-        createdAt: subDays(startOfToday(), 365).toISOString(),
-        completionData: generateMockCompletionData(0.86),
-    },
-    {
-        id: '2',
-        name: 'Read - 200 pages per week',
-        icon: 'menu-book',
-        color: 'red',
-        startDate: format(subDays(startOfToday(), 365), 'yyyy-MM-dd'),
-        endDate: null,
-        createdAt: subDays(startOfToday(), 365).toISOString(),
-        completionData: generateMockCompletionData(0.83),
-    },
-    {
-        id: '3',
-        name: 'Stretch - 2 times per day',
-        icon: 'accessibility',
-        color: 'purple',
-        startDate: format(subDays(startOfToday(), 365), 'yyyy-MM-dd'),
-        endDate: null,
-        createdAt: subDays(startOfToday(), 365).toISOString(),
-        completionData: generateMockCompletionData(0.77),
-    },
-];
+const MOCK_HABITS: Habit[] = [];
 
 function generateMockCompletionData(percentage: number): Record<string, number> {
     const data: Record<string, number> = {};

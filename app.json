@@ -2,12 +2,18 @@
   "expo": {
     "name": "HabitReport",
     "slug": "HabitTrackerAntiGravity",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon-minimalist-silver.png",
     "scheme": "habittrackerantigravity",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "updates": {
+      "url": "https://u.expo.dev/144e5c94-b04c-4d59-936d-5cca14289c91"
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.kaichinh.habittracker",
@@ -17,6 +23,7 @@
     },
     "android": {
       "package": "com.kaichinh.habittracker",
+      "versionCode": 4,
       "adaptiveIcon": {
         "backgroundColor": "#000000",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
